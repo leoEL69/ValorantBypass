@@ -1,27 +1,36 @@
 # 🛡️ Vanguard TPM Popup Bypass Tool
 
-Este projeto em C++ automatiza o bypass da proteção de **TPM/HVCI do Vanguard (Riot Anti-Cheat)**, impedindo o fechamento automático do jogo Valorant causado por falta de Secure Boot ou TPM.
-
-> ⚠️ **Atenção**: Este projeto é estritamente para fins educacionais e de pesquisa em segurança. O uso indevido para trapacear em jogos online viola os termos de serviço e pode resultar em banimento ou consequências legais.
+This tool was developed for **educational and research purposes only**. It aims to bypass the **TPM/Secure Boot popup** that appears when trying to run Valorant without certain security features enabled.
 
 ---
 
-## 🧠 Como Funciona
+## ⚙️ Features
 
-- Detecta o processo `VALORANT-Win64-Shipping.exe`.
-- Habilita `SeDebugPrivilege` para controle de processos protegidos.
-- Finaliza e configura o serviço `vgc` como manual.
-- Aguarda 20 segundos para injeção de DLLs ou load externo.
-- Realiza o bypass do popup de TPM localizando o `svchost.exe` com `tpmcore.dll` carregado e suspendendo-o via `pssuspend.exe`.
-- Monitora o processo `vgm.exe` e o suspende periodicamente para evitar revalidações do anti-cheat.
+- 🛑 Stops and disables the Vanguard service (`vgc`)
+- ⏳ Provides an injection window after Vanguard is down
+- 🧊 Detects and suspends `vgm.exe` (Valorant’s watchdog)
+- 🔒 Detects and suspends `svchost.exe` processes that load `tpmcore.dll` (source of the TPM popup)
+- ✅ Uses `pssuspend.exe` for safe process suspension (Sysinternals)
 
 ---
 
-## 🛠️ Pré-Requisitos
+## 📂 How It Works
 
-- Compilador C++ (Visual Studio recomendado)
-- Executar como **Administrador**
-- Windows 10/11
-- TPM desativado ou Secure Boot desativado
-- [PsSuspend.exe](https://learn.microsoft.com/en-us/sysinternals/downloads/pssuspend) (coloque na mesma pasta do .exe)
+1. Waits for the game to launch (`VALORANT-Win64-Shipping.exe`)
+2. Checks for admin and debug privileges
+3. Stops and configures `vgc` to manual
+4. Prompts the user to inject any custom code/cheat
+5. Searches for `svchost.exe` with `tpmcore.dll` and suspends it using **Sysinternals' `pssuspend.exe`**
+6. Monitors and suspends `vgm.exe` on loop
 
+---
+
+## 🧠 Requirements
+
+- Windows 10 or 11 (with admin rights)
+- [Sysinternals Suite](https://learn.microsoft.com/en-us/sysinternals/downloads/pssuspend) (`pssuspend.exe`)
+- Visual Studio (to compile)
+- TPM/Secure Boot turned **off**
+- Trusted Platform Module (TPM) **uninstalled** from Device Manager (optional, improves consistency)
+
+---
