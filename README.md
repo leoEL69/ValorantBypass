@@ -32,5 +32,6 @@ This tool was developed for **educational and research purposes only**. It aims 
 - Visual Studio (to compile)
 - TPM/Secure Boot turned **off**
 - Trusted Platform Module (TPM) **uninstalled** from Device Manager (optional, improves consistency)
+- brain!
 
 ---
