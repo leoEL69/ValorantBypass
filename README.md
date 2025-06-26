@@ -4,7 +4,7 @@ This tool was developed for **educational and research purposes only**. It aims 
 
 ---
 
-## ⚙ Features
+##  Features
 
 -  Stops and disables the Vanguard service (`vgc`)
 - Provides an injection window after Vanguard is down
