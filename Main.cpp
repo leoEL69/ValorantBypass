@@ -166,29 +166,54 @@ bool processHasDLL(DWORD pid, const std::wstring& dll) {
     return ok;
 }
 
+//melhoria no POPbypass
 void bypassTPMPopup() {
-    const std::wstring proc = L"svchost.exe";
-    const std::wstring dll = L"tpmcore.dll";
+    const std::wstring dllTarget = L"tpmcore.dll";
+    std::wcout << L"[BYPASS] Buscando svchost com '" << dllTarget << L"'...\n";
 
-    std::wcout << L"[BYPASS] Buscando svchost com '" << dll << L"'...\n";
     HANDLE snap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
     if (snap == INVALID_HANDLE_VALUE) return;
-    PROCESSENTRY32W e; e.dwSize = sizeof(e);
+
+    PROCESSENTRY32W e;
+    e.dwSize = sizeof(e);
+
     if (Process32FirstW(snap, &e)) {
         do {
-            if (_wcsicmp(e.szExeFile, proc.c_str()) == 0) {
-                if (processHasDLL(e.th32ProcessID, dll)) {
-                    std::wcout << L"[FOUND] PID " << e.th32ProcessID << L", suspend via pssuspend\n";
-                    std::wstringstream cmd; cmd << L"pssuspend.exe -accepteula " << e.th32ProcessID;
-                    _wsystem(cmd.str().c_str());
-                    break;
+            std::wstring exeName = e.szExeFile;
+
+         
+            if (_wcsicmp(exeName.c_str(), L"svchost.exe") == 0 && processHasDLL(e.th32ProcessID, dllTarget)) {
+                std::wcout << L"[FOUND] svchost.exe com " << dllTarget << L" (PID: " << e.th32ProcessID << L")\n";
+                std::wstringstream cmd;
+                cmd << L"pssuspend.exe -accepteula " << e.th32ProcessID;
+                _wsystem(cmd.str().c_str());
+                continue;
+            }
+
+            // Verifica se é o serviço de DNS Cache
+            if (_wcsicmp(exeName.c_str(), L"svchost.exe") == 0 || _wcsicmp(exeName.c_str(), L"dnscache") == 0) {
+                HANDLE hProcess = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, e.th32ProcessID);
+                if (hProcess) {
+                    WCHAR path[MAX_PATH];
+                    DWORD len = MAX_PATH;
+                    if (QueryFullProcessImageNameW(hProcess, 0, path, &len)) {
+                        std::wstring fullPath(path);
+                        if (fullPath.find(L"dnscache") != std::wstring::npos) {
+                            std::wcout << L"[FOUND] Processo dnscache encontrado (PID: " << e.th32ProcessID << L")\n";
+                            std::wstringstream cmd;
+                            cmd << L"pssuspend.exe -accepteula " << e.th32ProcessID;
+                            _wsystem(cmd.str().c_str());
+                        }
+                    }
+                    CloseHandle(hProcess);
                 }
             }
+
         } while (Process32NextW(snap, &e));
     }
+
     CloseHandle(snap);
 }
-
 
 
 int main() {
